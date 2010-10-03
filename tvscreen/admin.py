@@ -1,4 +1,4 @@
-from infoskjerm.tvscreen.models import Screen, Lab, Printer, Computer
+from lab_infoscreen.tvscreen.models import Screen, Lab, Printer, Computer
 from django.contrib import admin
 
 class LabInline(admin.TabularInline):

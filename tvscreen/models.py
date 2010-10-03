@@ -28,7 +28,7 @@ class Printer(models.Model):
 		return self.name
 
 	lab = models.ForeignKey(Lab)
-	printerqueue = models.IntegerField()
+	queue_size = models.IntegerField()
 	name = models.CharField(max_length=200)
 
 class Computer(models.Model):

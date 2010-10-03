@@ -4,7 +4,7 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns('lab_infoscreen.tvscreen.views',
     # Example:
     # (r'^lab_infoscreen/', include('lab_infoscreen.foo.urls')),
 
@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    (r'^lab/', include('lab_infoscreen.tvscreen.urls')),
-    (r'^admin/', include(admin.site.urls)),
+    (r'^$', 'index'),
+    (r'^(?P<lab_id>\d+)/$', 'lab'),
+    (r'^(?P<lab_id>\d+)/printer/(?P<printer_id>\d+)/$', 'printer_detail'),
 )

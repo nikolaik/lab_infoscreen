@@ -1,0 +1,9 @@
+{% if lab_list %}
+	<ul>
+		{% for lab in lab_list %}
+			<li><a href="/lab/{{ lab.id }}/">{{ lab.name }}</a></li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p>No labs defined.</p>
+{% endif %}

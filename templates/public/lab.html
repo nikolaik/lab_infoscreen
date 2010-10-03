@@ -1,0 +1,28 @@
+<h1>Welcome_msg {{ lab.name }}</h1>
+	<h2>Capacity</h2>
+		<h3>{{ lab.name }} ()</h3>
+		Cake diagram<br />
+		Busy: , Free:
+			<h4>other lab ()</h4>
+			Cake diagram<br />
+			Busy: , Free:
+			<h4>other lab ()</h4>
+			Cake diagram<br />
+			Busy: , Free:
+{% if printer_list %}
+	<h2>Printers</h2>
+	<ul>
+		{% for printer in printer_list %}
+			<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: if == 0: No queue. </li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p>No printers defined.</p>
+{% endif %}
+	<h2>Need help?</h2>
+	...then ask<br />
+	NAME<br />
+	or<br />
+	NAME</br>
+	<h2>Opening hours</h2>
+	<h2>Current time</h2>
