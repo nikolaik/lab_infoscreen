@@ -1,16 +1,23 @@
 TODO:
-- This is not right...
+- Not done yet...
 - http://code.djangoproject.com/wiki/SplitSettings
+
+UIO-specific setup:
+- added django official release dir. to $PYTHONPATH
 
 Classes:
 Lab
 	`- Printer
-		- Sync with lpq or similar. 
+		- Get from lpq or similar. 
 		
-	`- Computer
-		- Sync with rrds (infirior to rwho2)
+	`- Capacity
+		- Get from rrds
 
 	`- Openinghours
-		- Sync with Google cal.
+		- Get from Google cal.
 
-	`- Capacity
+	`- AdminComputer
+		- Get from rwho2-data
+		
+	`- Admin
+		- Get from pwd with rwho2-data
