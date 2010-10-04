@@ -1,8 +1,10 @@
-<h1>Welcome_msg {{ lab.name }}</h1>
+<h1>{{ lab.name }} lab</h1>
+Welcome_msg. 
 	<h2>Capacity</h2>
-		<h3>{{ lab.name }} ()</h3>
-		Cake diagram<br />
-		Busy: , Free:
+		<h3>Total {{ total_num_computers }}</h3>
+		<!--<img src="{{ chart.url }}" />-->
+		<img src="http://chart.apis.google.com/chart?chs=500x350&cht=p&chco=008000,FF3838&chd=s:Yl" /><br />
+		<h3>Busy: 1, Free: 3</h3>
 			<h4>other lab ()</h4>
 			Cake diagram<br />
 			Busy: , Free:
@@ -13,7 +15,7 @@
 	<h2>Printers</h2>
 	<ul>
 		{% for printer in printer_list %}
-			<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: if == 0: No queue. </li>
+			<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: {{ printer.queue_size }} </li>
 		{% endfor %}
 	</ul>
 {% else %}
@@ -25,4 +27,5 @@
 	or<br />
 	NAME</br>
 	<h2>Opening hours</h2>
-	<h2>Current time</h2>
+	<h2>{% now "H:m" %}</h2>
+	<h3>{% now "l j. F" %}</h3>

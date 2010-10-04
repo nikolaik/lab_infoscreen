@@ -2,3 +2,4 @@
 *.swp
 *.pyc
 settings.py
+lab_infoscreen.sqlite3

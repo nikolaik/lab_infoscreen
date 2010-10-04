@@ -1,5 +1,5 @@
 # Create your views here.
-from lab_infoscreen.tvscreen.models import Screen, Lab, Printer, Computer
+from lab_infoscreen.tvscreen.models import Lab, Printer, Computer, Admin, Chart
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 
@@ -10,7 +10,15 @@ def index(request):
 def lab(request, lab_id):
 	lab = get_object_or_404(Lab, pk=lab_id)
 	printer_list = Printer.objects.filter(lab=lab_id)
-	return HttpResponse(render_to_response('public/lab.html', {'lab' : lab,'printer_list' : printer_list}))
+	chart = Chart.objects.filter(lab=lab_id)
+	total_num_computers = Computer.objects.filter(lab=lab_id).count()
+	return HttpResponse(render_to_response('public/lab.html',
+		{
+		'lab' : lab,
+		'printer_list' : printer_list,
+		'chart' : chart,
+		'total_num_computers' : total_num_computers,
+		}))
 
 def printer_detail(request, lab_id, printer_id):
 	lab = get_object_or_404(Lab, pk=lab_id)

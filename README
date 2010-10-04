@@ -1,2 +1,16 @@
 TODO:
+- This is not right...
 - http://code.djangoproject.com/wiki/SplitSettings
+
+Classes:
+Lab
+	`- Printer
+		- Sync with lpq or similar. 
+		
+	`- Computer
+		- Sync with rrds (infirior to rwho2)
+
+	`- Openinghours
+		- Sync with Google cal.
+
+	`- Capacity

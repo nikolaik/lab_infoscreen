@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^lab/', include('lab_infoscreen.tvscreen.urls')),
     (r'^admin/', include(admin.site.urls)),
+    (r'^$', include('lab_infoscreen.tvscreen.urls')),
 )

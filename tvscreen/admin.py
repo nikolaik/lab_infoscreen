@@ -1,20 +1,22 @@
-from lab_infoscreen.tvscreen.models import Screen, Lab, Printer, Computer
+from lab_infoscreen.tvscreen.models import Lab, Printer, Computer, Admin, Chart
 from django.contrib import admin
 
-class LabInline(admin.TabularInline):
-	model = Lab
-	extra = 0
+class ComputerInline(admin.TabularInline):
+	model = Computer
+	extra = 2
 
-class ScreenAdmin(admin.ModelAdmin):
-	fieldsets = [
-		(None,	{'fields': ['description']})
-	]
-	inlines = [LabInline]
+class PrinterInline(admin.TabularInline):
+	model = Printer
+	extra = 1
 
 class LabAdmin(admin.ModelAdmin):
-	list_filter = ['name']
+	fieldsets = [
+		(None,	{'fields': ['name']})
+	]
+	inlines = [ComputerInline, PrinterInline]
 
-admin.site.register(Screen, ScreenAdmin)
-admin.site.register(Lab)
+admin.site.register(Lab, LabAdmin)
 admin.site.register(Printer)
 admin.site.register(Computer)
+admin.site.register(Admin)
+admin.site.register(Chart)

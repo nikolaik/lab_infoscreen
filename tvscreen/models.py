@@ -6,21 +6,20 @@ The sceleton for this app is based on:
 '''
 
 # Create your models here.
-class Screen(models.Model):
-	# ...
-	def __unicode__(self):
-		return self.description
-
-	description = models.CharField(max_length=200)
-	
 class Lab(models.Model):
 	# ...
 	def __unicode__(self):
 		return self.name
 
-	screen = models.ForeignKey(Screen)
 	name = models.CharField(max_length=200)
 	# TODO: Opening times
+
+class Chart(models.Model):
+	def __unicode__(self):
+		return self.desc
+	lab = models.ForeignKey(Lab)
+	desc = models.CharField(max_length=200)
+	url = models.CharField(max_length=300)
 
 class Printer(models.Model):
 	# ...
@@ -43,6 +42,12 @@ class Computer(models.Model):
 	os = models.CharField(max_length=200)
 	name = models.CharField(max_length=200)
 	taken = models.IntegerField()
+
+class Admin(models.Model):
+	def __unicode__(self):
+		return self.name
+	computer = models.ForeignKey(Computer)
+	name = models.CharField(max_length=200)
 
 
 '''
