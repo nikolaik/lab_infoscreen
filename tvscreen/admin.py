@@ -1,4 +1,4 @@
-from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, Admin, AdminComputer, OpeningHours
+from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, Admin, AdminComputer, OpeningHours, OS
 from django.contrib import admin
 
 class AdminComputerInline(admin.TabularInline):
@@ -21,3 +21,4 @@ admin.site.register(Admin)
 admin.site.register(AdminComputer)
 admin.site.register(Capacity)
 admin.site.register(OpeningHours)
+admin.site.register(OS)

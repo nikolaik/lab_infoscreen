@@ -19,15 +19,23 @@ class OpeningHours(models.Model):
 	date_opens = models.DateTimeField('date opens')
 	date_closes = models.DateTimeField('date closes')
 
+
+class OS(models.Model):
+	name = models.CharField(max_length=200)
+
 class Capacity(models.Model):
 	def __unicode__(self):
-		return str(self.lab) + ": " + str(self.os) + ": " +str(self.total-self.busy) + "/" + str(self.total)
+		return str(self.lab) + ": " + str(self.os) + ": " +str(self.total-self.in_use) + "/" + str(self.total)
 
 	lab = models.ForeignKey(Lab)
 
-	os = models.CharField(max_length=200)
-	busy = models.IntegerField()
+	os = models.ForeignKey(OS)
+	
+	in_use = models.IntegerField()
+	down = models.IntegerField()
 	total = models.IntegerField()
+
+	last_updated = models.DateTimeField('last updated')
 	url = models.CharField(max_length=300)
 
 class Printer(models.Model):
@@ -51,7 +59,7 @@ class AdminComputer(models.Model):
 	lab = models.ForeignKey(Lab)
 
 	name = models.CharField(max_length=200)
-	taken = models.IntegerField()
+	in_use = models.IntegerField()
 
 class Admin(models.Model):
 	def __unicode__(self):

@@ -2,8 +2,12 @@
 {{ lab.welcome_msg }} 
 	<h2>Capacity</h2>
 		<h3>Total {{ total_capacity }}</h3>
+			{% if total_capacity %}
 			<img src=" {{ url_capacity }} " />
-			<h4>Total: {{ total_capacity }}, busy: {{ busy_capacity }}</h4>
+			{% else %}
+			No data.
+			{% endif %}
+			<h4>Total: {{ total_capacity }}, in use: {{ in_use_capacity }}</h4>
 			<h5>other lab ()</h5>
 			Cake diagram<br />
 			Busy: , Free:
