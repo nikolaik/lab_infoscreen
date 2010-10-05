@@ -12,7 +12,7 @@ class Lab(models.Model):
 
 class OpeningHours(models.Model):
 	def __unicode__(self):
-		return self.date_opens, self.date_closes
+		return str(self.date_opens) + str(self.date_closes)
 
 	lab = models.ForeignKey(Lab)
 
@@ -21,7 +21,7 @@ class OpeningHours(models.Model):
 
 class Capacity(models.Model):
 	def __unicode__(self):
-		return self.total, self.busy, self.os
+		return str(self.lab) + ": " + str(self.os) + ": " +str(self.total-self.busy) + "/" + str(self.total)
 
 	lab = models.ForeignKey(Lab)
 

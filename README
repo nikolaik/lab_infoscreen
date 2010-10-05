@@ -1,6 +1,7 @@
 TODO:
 - Not done yet...
 - http://code.djangoproject.com/wiki/SplitSettings
+- replace static image charts with http://code.google.com/apis/visualization/documentation/index.html
 
 UIO-specific setup:
 - added django official release dir. to $PYTHONPATH
