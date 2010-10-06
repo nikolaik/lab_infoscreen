@@ -21,6 +21,8 @@ class OpeningHours(models.Model):
 
 
 class OS(models.Model):
+	def __unicode__(self):
+		return self.name
 	name = models.CharField(max_length=200)
 
 class Capacity(models.Model):

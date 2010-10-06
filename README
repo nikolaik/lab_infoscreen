@@ -1,5 +1,7 @@
 TODO:
-- Not done yet...
+- views.update_capacities() write to database.
+- other_labs object in views.lab
+- function params for graph size in create_graph-functions
 - http://code.djangoproject.com/wiki/SplitSettings
 - replace static image charts with http://code.google.com/apis/visualization/documentation/index.html
 
