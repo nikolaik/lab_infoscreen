@@ -44,9 +44,9 @@
 		<div class="admins">
 			<h2>Need help?</h2>
 			...then ask<br />
-			NAME<br />
-			or<br />
-			NAME</br>
+		{% for admin in admins %}
+			{{ admin }}<br />
+		{% endfor %}
 		</div>
 		<div class="hours">
 			<h2>Opening hours</h2>

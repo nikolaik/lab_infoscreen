@@ -15,11 +15,8 @@ Lab
 	`- Capacity
 		- Get from rrds [DONE]
 
-	`- Openinghours
+	`- OpeningHours
 		- Get from Google cal.
 
 	`- AdminComputer
-		- Get from rwho2-data
-		
-	`- Admin
-		- Get from pwd with rwho2-data
+		- Get from rwho2-data [DONE]

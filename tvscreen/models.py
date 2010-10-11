@@ -61,13 +61,4 @@ class AdminComputer(models.Model):
 	lab = models.ForeignKey(Lab)
 
 	name = models.CharField(max_length=200)
-	in_use = models.IntegerField()
-
-class Admin(models.Model):
-	def __unicode__(self):
-		return self.name
-
-	computer = models.ForeignKey(AdminComputer)
-
-	name = models.CharField(max_length=200)
-
+	admin_username = models.CharField(max_length=30)

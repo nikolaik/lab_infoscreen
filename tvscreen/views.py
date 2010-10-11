@@ -1,8 +1,8 @@
 # Create your views here.
-from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, Admin, AdminComputer, OpeningHours, OS
+from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer, OpeningHours, OS
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
-import sys, os, re
+import sys, os, re, pwd
 from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
 
@@ -14,12 +14,14 @@ def lab(request, lab_id):
 	lab = get_object_or_404(Lab, pk=lab_id)
 
 	printer_list = Printer.objects.filter(lab=lab_id)
-	update_capacities(Lab.objects.all(),OS.objects.all())
+	update_capacities()
+	update_admins_martbo_style()
 	capacity_list = Capacity.objects.select_related().filter(lab=lab_id)
 	totals = get_totals(capacity_list)
 	url_totals = create_totals_pie_url(capacity_list, 300)
 	url_os = create_os_bar_url(capacity_list)
 	others = create_other_urls(Lab.objects.exclude(pk=lab_id))
+	admins = get_names(lab_id)
 	return HttpResponse(render_to_response('public/lab.html',
 		{
 		'lab' : lab,
@@ -29,6 +31,7 @@ def lab(request, lab_id):
 		'url_totals' : url_totals,
 		'url_os' : url_os,
 		'others' : others,
+		'admins' : admins,
 		}))
 
 def printer_detail(request, lab_id, printer_id):
@@ -105,29 +108,27 @@ def create_totals_pie_url(capacity_list, px):
 	
 	return o
 
-def update_capacities(labs, oses):
-
+def update_capacities():
 	### CONFIG ###
 	# Location of rrdtool
 	rrdtool = "/usr/bin/X11/rrdtool"
 	# rrdtool command
 	rrd_cmd = "lastupdate"
 	rrd_update = datetime.now() - timedelta(minutes=15)
+
+	labs = Lab.objects.all()
+	oses = OS.objects.all()
 	'''
 	Is update is older than now - rrd-update interval min?
 	If not then update, else return true.
 	Update all the labs
 	'''
-	i = 0
 	for the_lab in labs:
-		#if lab.update < 
 		for the_os in oses:
-			#cmd = [rrdtool,rrd_cmd, get_rrd_path(lab, os)]
-			#p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-			#stdout, stderr = p.communicate()
-			i = i + 1
+			cmd = [rrdtool,rrd_cmd, get_rrd_path(the_lab.name, the_os.name)]
+			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+			stdout, stderr = p.communicate()
 
-			stdout = "1286747381 10 0 " + str(20 + i + 7)
 			tmp_new_last_updated, new_in_use, new_down, new_total = parse_lastupdate(stdout)
 			new_last_updated = datetime.fromtimestamp(int(tmp_new_last_updated))
 			cur, created = Capacity.objects.get_or_create(lab=the_lab,os=the_os,
@@ -140,11 +141,36 @@ def update_capacities(labs, oses):
 				cur.down = new_down
 				cur.total = new_total
 				cur.save()
+	#print new_last_updated # TODO: print this aswell
 
 def parse_lastupdate(string):
 	return re.findall(r"(\d+)",string)
 
-def get_rrd_path(lab, os):
+def get_rrd_path(lab, the_os):
 	# Directory containing the rrd-files to parse
-	#rrddir = os.path.expanduser('~termvakt/stuestatistikk/rrd/')
-	return rrddir + lab + '-' + os + '.rrd'
+	rrddir = os.path.expanduser('~termvakt/stuestatistikk/rrd/')
+	return rrddir + lab + '-' + the_os + '.rrd'
+
+def update_admins_martbo_style():
+	rwhodir = os.path.expanduser('~martbo/bin/infoskjerm/')
+
+	adm_comp = AdminComputer.objects.all()
+
+	for comp in adm_comp:
+		filename = os.path.join(rwhodir,"rwho2." + comp.name + ".ifi.uio.no")
+		file = open(filename)
+		try:
+			comp.admin_username = re.findall(r"user;1;(\w+);;:0",file.read())[0]
+			comp.save()
+		finally:
+			file.close()
+
+def get_names(lab_id):
+	comps = AdminComputer.objects.filter(lab=lab_id)
+
+	names = [get_firstname(comp.admin_username) for comp in comps]
+	return names
+	
+def get_firstname(username):
+	# ask the user database for iso-8859-1 encoded full name, then take the first name from it.
+	return pwd.getpwnam(username)[4].decode('iso-8859-1').split()[0]
