@@ -1,7 +1,4 @@
 TODO:
-- views.update_capacities() write to database.
-- other_labs object in views.lab
-- function params for graph size in create_graph-functions
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik
 - http://code.djangoproject.com/wiki/SplitSettings
