@@ -1,7 +1,5 @@
 from django.db import models
 
-
-# Create your models here.
 class Lab(models.Model):
 	# ...
 	def __unicode__(self):
@@ -27,7 +25,10 @@ class OS(models.Model):
 
 class Capacity(models.Model):
 	def __unicode__(self):
-		return str(self.lab) + ": " + str(self.os) + ": " +str(self.total-self.in_use) + "/" + str(self.total)
+		return str(self.lab) + ": " + str(self.os) + ": " +str(free()) + "/" + str(self.total)
+
+	def free(self):
+		return self.total - self.in_use - self.down
 
 	lab = models.ForeignKey(Lab)
 
@@ -38,7 +39,6 @@ class Capacity(models.Model):
 	total = models.IntegerField()
 
 	last_updated = models.DateTimeField('last updated')
-	url = models.CharField(max_length=300)
 
 class Printer(models.Model):
 	# ...
@@ -71,19 +71,3 @@ class Admin(models.Model):
 
 	name = models.CharField(max_length=200)
 
-'''
-The sceleton for this app is based on:
-	http://docs.djangoproject.com/en/1.2/intro/tutorial02/
-'''
-'''
-from django.db import models
-
-class Poll(models.Model):
-    question = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
-
-class Choice(models.Model):
-    poll = models.ForeignKey(Poll)
-    choice = models.CharField(max_length=200)
-    votes = models.IntegerField()
-'''

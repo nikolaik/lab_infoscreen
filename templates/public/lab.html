@@ -1,33 +1,59 @@
-<h1>{{ lab.name }} lab</h1>
-{{ lab.welcome_msg }} 
-	<h2>Capacity</h2>
-		<h3>Total {{ total }}</h3>
-			{% if total %}
-			Free (os):<br />
-			<img src=" {{ url_os }} " />
-			<img src=" {{ url_totals }} " />
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+	<head>
+		<title>{{ lab.name }}</title>
+	</head>
+	<body>
+
+	<div id="header">
+		<h1>{{ lab.name }} lab</h1>
+		{{ lab.welcome_msg }} 
+	</div>
+	<div id="contents">
+		<div class="capacity">
+			<h2>Capacity</h2>
+			{% if totals %}
+			<img src="{{ url_totals }}" />
+			<img src="{{ url_os }}" />
+			Total {{ totals.total }}, in use: {{ totals.in_use }}, free: {{ totals.free }}
 			{% else %}
 			No data.
 			{% endif %}
-			<h4>In use: {{ in_use }}, free: {{ free }}</h4>
-			<h5>other lab ()</h5>
-			Cake diagram<br />
-			Busy: , Free:
-{% if printer_list %}
-	<h2>Printers</h2>
-	<ul>
-		{% for printer in printer_list %}
-			<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: {{ printer.queue_size|default:"No queue." }} </li>
+		</div>
+		{% for other in others %}
+		<div class="capacity_other">
+			<h2>{{ other.lab.name }}</h2>
+			<img src="{{ other.url }}" />
+		</div>
 		{% endfor %}
-	</ul>
-{% else %}
-	<p>No printers defined.</p>
-{% endif %}
-	<h2>Need help?</h2>
-	...then ask<br />
-	NAME<br />
-	or<br />
-	NAME</br>
-	<h2>Opening hours</h2>
-	<h2>{% now "H:m" %}</h2>
-	<h3>{% now "l j. F" %}</h3>
+
+		{% if printer_list %}
+		<div class="printers">
+			<h2>Printers</h2>
+			<ul>
+				{% for printer in printer_list %}
+					<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: {{ printer.queue_size|default:"No queue." }} </li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<p>No printers defined.</p>
+		{% endif %}
+		</div>
+		<div class="admins">
+			<h2>Need help?</h2>
+			...then ask<br />
+			NAME<br />
+			or<br />
+			NAME</br>
+		</div>
+		<div class="hours">
+			<h2>Opening hours</h2>
+			<h3>{% now "H:m" %}</h3>
+			<h3>{% now "l j. F" %}</h3>
+		</div>
+
+	</div>
+	</body>
+</html>
