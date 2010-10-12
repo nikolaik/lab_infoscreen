@@ -90,6 +90,10 @@ def create_totals_pie_url(capacity_list, px):
 	# Reference: http://code.google.com/apis/chart/docs/gallery/pie_charts.html
 	# TODO: Add markers!
 	totals = get_totals(capacity_list)
+	if totals['total'] == 0:
+		print "Could not create a pie-url. No capacity data."
+		return "" 
+
 	o = "http://chart.apis.google.com/chart?"
 	# Axis style = 0, rgb, points
 	o += "chxs=0,000000,30&"
@@ -112,6 +116,10 @@ def update_capacities():
 	### CONFIG ###
 	# Location of rrdtool
 	rrdtool = "/usr/bin/X11/rrdtool"
+	if not os.path.exists(rrdtool):
+		print "rrdtool is not installed. Run: 'sudo apt-get install rrdtool' to fix"
+		return
+
 	# rrdtool command
 	rrd_cmd = "lastupdate"
 	rrd_update = datetime.now() - timedelta(minutes=15)
@@ -125,7 +133,10 @@ def update_capacities():
 	'''
 	for the_lab in labs:
 		for the_os in oses:
-			cmd = [rrdtool,rrd_cmd, get_rrd_path(the_lab.name, the_os.name)]
+			rrd_path = get_rrd_path(the_lab.name, the_os.name)
+			if not rrd_path:
+				return
+			cmd = [rrdtool, rrd_cmd, rrd_path]
 			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 			stdout, stderr = p.communicate()
 
@@ -148,29 +159,45 @@ def parse_lastupdate(string):
 
 def get_rrd_path(lab, the_os):
 	# Directory containing the rrd-files to parse
-	rrddir = os.path.expanduser('~termvakt/stuestatistikk/rrd/')
-	return rrddir + lab + '-' + the_os + '.rrd'
+	rrd_dir = os.path.expanduser('~termvakt/stuestatistikk/rrd/')
+	rrd_path = rrd_dir + lab + '-' + the_os + '.rrd'
+	if not os.path.exists(rrd_path):
+		print 'Looked in ' + rrd_dir + ' for ' + lab + '-' + the_os + '.rrd, but did not find it.'
+		return None
+	return rrd_path
 
 def update_admins_martbo_style():
 	rwhodir = os.path.expanduser('~martbo/bin/infoskjerm/')
+
 
 	adm_comp = AdminComputer.objects.all()
 
 	for comp in adm_comp:
 		filename = os.path.join(rwhodir,"rwho2." + comp.name + ".ifi.uio.no")
-		file = open(filename)
-		try:
-			comp.admin_username = re.findall(r"user;1;(\w+);;:0",file.read())[0]
-			comp.save()
-		finally:
-			file.close()
+		if not os.path.exists(filename):
+			print "did not find " + filename + ". Aborting update..."
+			break
+		else:
+			try:
+				file = open(filename)
+				comp.admin_username = re.findall(r"user;1;(\w+);;:0",file.read())[0]
+				comp.save()
+			finally:
+				file.close()
 
 def get_names(lab_id):
 	comps = AdminComputer.objects.filter(lab=lab_id)
 
 	names = [get_firstname(comp.admin_username) for comp in comps]
+	if names[0] == None:
+		return
 	return names
 	
 def get_firstname(username):
 	# ask the user database for iso-8859-1 encoded full name, then take the first name from it.
-	return pwd.getpwnam(username)[4].decode('iso-8859-1').split()[0]
+	try:
+		firstname = pwd.getpwnam(username)[4].decode('iso-8859-1').split()[0]
+	except KeyError: 
+		print 'Looked for \'' + username + '\' in the user database, but with no luck...'
+		return None
+	return firstname

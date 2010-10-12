@@ -14,7 +14,7 @@
 	<div id="contents">
 		<div class="capacity">
 			<h2>Capacity</h2>
-			{% if totals %}
+			{% if totals.total %}
 			<img src="{{ url_totals }}" />
 			<img src="{{ url_os }}" />
 			Total {{ totals.total }}, in use: {{ totals.in_use }}, free: {{ totals.free }}
@@ -24,8 +24,12 @@
 		</div>
 		{% for other in others %}
 		<div class="capacity_other">
-			<h2>{{ other.lab.name }}</h2>
-			<img src="{{ other.url }}" />
+			{% if other.url %}
+				<h2>{{ other.lab.name }}</h2>
+				<img src="{{ other.url }}" />
+			{% else %}
+			No data.
+			{% endif %}
 		</div>
 		{% endfor %}
 
@@ -43,10 +47,10 @@
 		</div>
 		<div class="admins">
 			<h2>Need help?</h2>
-			...then ask<br />
-		{% for admin in admins %}
-			{{ admin }}<br />
-		{% endfor %}
+			Then just ask your lab assistants 
+			{% for admin in admins %}
+				{{ admin }},
+			{% endfor %}
 		</div>
 		<div class="hours">
 			<h2>Opening hours</h2>
