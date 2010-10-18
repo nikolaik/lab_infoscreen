@@ -7,6 +7,14 @@ TODO:
 UIO-specific setup:
 - added django official release dir. to $PYTHONPATH
 
+There a few dependencies allready:
+- django (ubuntu: python-django)
+	- src: http://www.djangoproject.com/download/
+- gdata (ubuntu: python-gdata)
+	- src: http://code.google.com/p/gdata-python-client/
+- vobject (ubuntu: python-vobject)
+	- src: http://vobject.skyhouseconsulting.com/
+
 Classes:
 Lab
 	`- Printer

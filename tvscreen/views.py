@@ -5,6 +5,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 import sys, os, re, pwd
 from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
+import gdata.calendar.service
+import vobject
+
 
 def index(request):
 	lab_list = Lab.objects.all().order_by('name')
@@ -22,6 +25,7 @@ def lab(request, lab_id):
 	url_os = create_os_bar_url(capacity_list)
 	others = create_other_urls(Lab.objects.exclude(pk=lab_id))
 	admins = get_names(lab_id)
+	hours = get_todays_openinghours()
 	return HttpResponse(render_to_response('public/lab.html',
 		{
 		'lab' : lab,
@@ -201,3 +205,30 @@ def get_firstname(username):
 		print 'Looked for \'' + username + '\' in the user database, but with no luck...'
 		return None
 	return firstname
+
+def get_todays_openinghours():
+	calender_uri = './calendar/feeds/omhp3g69p6cgc0je9mfr31bcv4%40group.calendar.google.com/public/full'
+	# Create a client class which will make HTTP requests with Google Docs server.
+	client = gdata.calendar.service.CalendarService()
+
+	# Query the server for an Atom feed containing a list of your calendars.
+	calendar_feed = client.GetCalendarEventFeed(calender_uri)
+	# Loop through the feed and extract each calendar entry.
+	print_event_feed(calendar_feed)
+
+def print_event_feed(event_feed):
+
+	for index, event in enumerate(event_feed.entry):
+		print "\t%d) %s\r\n\tContent: %s" % (index, event.title.text, event.content.text)
+		print "\t\tWho:"
+		for person in event.who:
+			print "\t\t\tName: %s\n\t\t\temail: %s" % (person.name, person.email)
+		print "\t\tAuthors:"
+		for author in event.author:
+			print "\t\t\t%s" % (author.name.text)
+		print "\t\tWhen:"
+		if event.recurrence is not None:
+			parsedCal = vobject.readOne(event.recurrence.text)
+			print parsedCal
+		#for e_index, e_time in enumerate(event.when):
+		#	print "\t\t\t%d) Start time: %s\n\t\t\tEnd time: %s" % (e_index, e_time.start_time, e_time.end_time)
