@@ -1,4 +1,5 @@
 TODO:
+- Google calendar data should be cached, instead of being fetched per reload.
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik
 - http://code.djangoproject.com/wiki/SplitSettings
@@ -12,8 +13,9 @@ There a few dependencies allready:
 	- src: http://www.djangoproject.com/download/
 - gdata (ubuntu: python-gdata)
 	- src: http://code.google.com/p/gdata-python-client/
-- vobject (ubuntu: python-vobject)
-	- src: http://vobject.skyhouseconsulting.com/
+
+Included:
+- Some Ubuntu/GNOME icons.
 
 Classes:
 Lab
@@ -24,7 +26,7 @@ Lab
 		- Get from rrds [DONE]
 
 	`- OpeningHours
-		- Get from Google cal.
+		- Get from Google cal [DONE]
 
 	`- AdminComputer
 		- Get from rwho2-data [DONE]

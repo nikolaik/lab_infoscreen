@@ -12,7 +12,11 @@ urlpatterns = patterns('',
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
-    # Uncomment the next line to enable the admin:
+	# static file serving for development 
+	# Note: See: http://docs.djangoproject.com/en/dev/howto/static-files/
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': '/home/nikk/dev/lab_infoscreen/static'}),
+	#  tvscreen-specific
     (r'^lab/', include('lab_infoscreen.tvscreen.urls')),
     (r'^admin/', include(admin.site.urls)),
     (r'^$', include('lab_infoscreen.tvscreen.urls')),

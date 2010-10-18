@@ -12,9 +12,16 @@ body {
 	color:#ffffff;
 	font-family:'Helvetica';
 	font-size:1.5em;
+	height:100%;
+	padding:0;
+	margin:0;
+}
+div#container {
+	min-height:100%;
+	position:relative;
 }
 div#header {
-	padding:0px;
+	padding:10px;
 	margin:0px;
 	font-size:2em;
 }
@@ -22,28 +29,45 @@ div#header h1 {
 	display:inline;
 }
 div#left{
-	width:600px;
 	float:left;
+	padding-left:10px;
+	width:55%;
 }
 div#right{
 	float:right;
-	width:600px;
+	width:42%;
+	padding-left:25px;
+	margin-top:50px;
+	border-left:2px solid #ffffff;
+}
+div#footer {
+	float:right;
+	margin-top:50px;
+	bottom:0;
+	width:100%;
+	background:#222222;
+	font-size:1.5em;
 }
 div.stats_title {
 	font-size:0.8em;
-	border-bottom:1px solid #ffffff;
+	border-bottom:2px solid #ffffff;
 }
 div.stats_content {
-	font-size:2em;
-
+	font-size:2.3em;
 }
 div.printers {
 }
 div.admins {
 }
-div.hours {
+span.admin_name {
+	font-size:2.3em;
 }
-
+div.hours {
+	font-size:2.3em;
+}
+span.current_time {
+	float: right;
+}
 h2 {
 	margin-bottom:0.5em;
 }

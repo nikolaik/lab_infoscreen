@@ -3,89 +3,102 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>{{ lab.name|capfirst }}</title>
-		<link rel="stylesheet"  type="text/css" href="http://folk.uio.no/nikolark/css/4sq_like.css" />
+		<link rel="stylesheet"  type="text/css" href="/static/4sq_like.css" />
 	</head>
 	<body>
-	<div id="header"><h1>{{ lab.name|capfirst }} lab</h1>
-		{{ lab.welcome_msg }} 
-	</div>
-	<div id="left">
-		<div class="capacity">
-			<h2>Capacity</h2>
-			{% if totals.total %}
-			<table>
-				<tbody>
-					<tr>
-						<td>
-							<div class="stats_title">Total</div><div class="stats_content">{{ totals.total }}</div>
-						</td>
-						<td>
-							<div class="stats_title">Free</div><div class="stats_content">{{ totals.free }}</div>
-						</td>
-						<td>
-							<div class="stats_title">In Use</div><div class="stats_content">{{ totals.in_use}}</div>
-						</td>
-						<!-- percent -->
+	<div id="container">
+		<div id="header"><h1>{{ lab.name|capfirst }} lab</h1>
+			{{ lab.welcome_msg }} 
+		</div>
+		<div id="left">
+			<div class="capacity">
+				<h2>Capacity</h2>
+				{% if totals.total %}
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<div class="stats_title">Total</div><div class="stats_content">{{ totals.total }}</div>
+							</td>
+							<td>
+								<div class="stats_title">Free</div><div class="stats_content">{{ totals.free }}</div>
+							</td>
+							<td>
+								<div class="stats_title">In Use</div><div class="stats_content">{{ totals.in_use}}</div>
+							</td>
+							<!-- percent -->
 
-					</tr>
-					<tr>
-						<td colspan="2">
-							<img src="{{ url_totals }}" />
-						</td>
-						<td>
-							<img src="{{ url_os }}" />
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			{% else %}
-			No data.
-			{% endif %}
-		</div>
-		<div class="capacity_other">
-			<table>
-				<tbody>
-					<tr>
-					{% for other in others %}
-							{% if other.url %}
-								<td width="200">
-									<h3>{{ other.lab.name }}</h3>
-									<img src="{{ other.url }}" />
-								</td>
-							{% else %}
-								No data.
-							{% endif %}
-					{% endfor %}
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
-	<div id="right">
-		{% if printer_list %}
-		<div class="printers">
-			<h2>Printers</h2>
-			<ul>
-				{% for printer in printer_list %}
-					<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: {{ printer.queue_size|default:"No queue." }} </li>
-				{% endfor %}
-			</ul>
-		{% else %}
-			<p>No printers defined.</p>
-		{% endif %}
+						</tr>
+						<tr>
+							<td colspan="2">
+								<img src="{{ url_totals }}" />
+							</td>
+							<td>
+								<img src="{{ url_os }}" />
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				{% else %}
+				No data.
+				{% endif %}
+			</div>
+			<div class="capacity_other">
+				<table>
+					<tbody>
+						<tr>
+						{% for other in others %}
+								{% if other.url %}
+									<td width="200">
+										<h3>{{ other.lab.name }}</h3>
+										<img src="{{ other.url }}" />
+									</td>
+								{% else %}
+									No data.
+								{% endif %}
+						{% endfor %}
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 		<div class="admins">
 			<h2>Need help?</h2>
 			Then just ask your lab assistants 
 			{% for admin in admins %}
-				{{ admin }},
+				<span class="admin_name">{{ admin }}</span>
 			{% endfor %}
 			<!-- TODO: Sort according to custom machine order. -->
 		</div>
-		<div class="hours">
-			<h2>Opening hours</h2>
-			<h3>{% now "H:m" %}</h3>
-			<h3>{% now "l j. F" %}</h3>
+			{% if printer_list %}
+		<div id="right">
+			<div class="printers">
+				<table>
+					<tr>
+						<td>
+							<img src="/static/printer.svg" />
+						</td>
+						<td>
+							<ul>
+								{% for printer in printer_list %}
+									<li><a href="/lab/{{ lab.id }}/printer/{{ printer.id }}">{{ printer.name }}</a>: {{ printer.queue_size|default:"No queue." }} </li>
+								{% endfor %}
+							</ul>
+						</td>
+					</tr>
+				</table>
+			{% else %}
+				<p>No printers defined.</p>
+			{% endif %}
+			</div>
+			<div class="hours">
+				<img src="/static/cairo-clock.svg" />
+				<span class="time">{{ hours.start|date:"H.i" }}</span> - <span class="time">{{ hours.end|date:"H.i" }}</span>
+			</div>
+		</div>
+		<div id="footer">
+		Lab assistants @ Mat-Nat
+			<span class="current_time">{% now "H.m - l j. F" %}</span>
 		</div>
 	</div>
 	</body>

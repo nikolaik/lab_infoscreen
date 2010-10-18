@@ -3,10 +3,10 @@ from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 import sys, os, re, pwd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date, time
 from subprocess import Popen, PIPE
 import gdata.calendar.service
-import vobject
+from urllib import urlencode, quote
 
 
 def index(request):
@@ -23,9 +23,9 @@ def lab(request, lab_id):
 	totals = get_totals(capacity_list)
 	url_totals = create_totals_pie_url(capacity_list, 400)
 	url_os = create_os_bar_url(capacity_list)
-	others = create_other_urls(Lab.objects.exclude(pk=lab_id))
+	others = create_other_urls(lab_id)
 	admins = get_names(lab_id)
-	hours = get_todays_openinghours()
+	hours = get_todays_openinghours(lab_id)
 	return HttpResponse(render_to_response('public/lab.html',
 		{
 		'lab' : lab,
@@ -36,6 +36,7 @@ def lab(request, lab_id):
 		'url_os' : url_os,
 		'others' : others,
 		'admins' : admins,
+		'hours' : hours,
 		}))
 
 def printer_detail(request, lab_id, printer_id):
@@ -53,9 +54,11 @@ def get_totals(capacity_list):
 		total += capacity.total
 		in_use += capacity.in_use
 		down += capacity.down
+	#total = 20;in_use = 5; down = 0 # FIXME: DEBUG
 	return {'total':total, 'in_use':in_use, 'free':total-in_use-down}
 
-def create_other_urls(other_labs):
+def create_other_urls(lab_id):
+	other_labs = Lab.objects.exclude(pk=lab_id)
 	urls = []
 	for olab in other_labs:
 		urls.append( {'lab': olab, 'url': create_totals_pie_url(Capacity.objects.select_related().filter(lab=olab.id), 200)})
@@ -63,6 +66,7 @@ def create_other_urls(other_labs):
 
 def create_os_bar_url(capacity_list):
 	# TODO: text color-parameter
+	# TODO: urllib.urlencode
 	# Reference: http://code.google.com/apis/chart/docs/gallery/bar_charts.html
 	# free = total-(down+in_use)
 	free = [c.total - c.down - c.in_use for c in capacity_list]
@@ -97,6 +101,7 @@ def create_totals_pie_url(capacity_list, px):
 	# Reference: http://code.google.com/apis/chart/docs/gallery/pie_charts.html
 	# TODO: Add markers!
 	# TODO: text color-parameter
+	# TODO: urllib.urlencode
 	totals = get_totals(capacity_list)
 	if totals['total'] == 0:
 		print "Could not create a pie-url. No capacity data."
@@ -137,9 +142,9 @@ def update_capacities():
 	labs = Lab.objects.all()
 	oses = OS.objects.all()
 	'''
-	Is update is older than now - rrd-update interval min?
+	Is update older than now-rrd-update interval min?
 	If not then update, else return true.
-	Update all the labs
+	Update all the labs.
 	'''
 	for the_lab in labs:
 		for the_os in oses:
@@ -162,7 +167,6 @@ def update_capacities():
 				cur.down = new_down
 				cur.total = new_total
 				cur.save()
-	#print new_last_updated # TODO: print this aswell
 
 def parse_lastupdate(string):
 	return re.findall(r"(\d+)",string)
@@ -211,29 +215,29 @@ def get_firstname(username):
 		return None
 	return firstname
 
-def get_todays_openinghours():
-	calender_uri = './calendar/feeds/omhp3g69p6cgc0je9mfr31bcv4%40group.calendar.google.com/public/full'
-	# Create a client class which will make HTTP requests with Google Docs server.
+def get_todays_openinghours(lab_id):
+	lab = Lab.objects.get(pk=lab_id)
+	today = datetime.today()
+	today_str = today.strftime("%Y-%m-%d")
+	tomorrow_str = (today + timedelta(days=1)).strftime("%Y-%m-%d")
+
+	# Create a client class which will make HTTP requests.
 	client = gdata.calendar.service.CalendarService()
-
+	# Build the query 
+	calendar_id = 'omhp3g69p6cgc0je9mfr31bcv4@group.calendar.google.com'
+	query = gdata.calendar.service.CalendarEventQuery(calendar_id, 'public', 'full')
+	query.start_min = today_str	# inclusive
+  	query.start_max = tomorrow_str # exclusive
 	# Query the server for an Atom feed containing a list of your calendars.
-	calendar_feed = client.GetCalendarEventFeed(calender_uri)
+  	calendar_feed = client.CalendarQuery(query)
 	# Loop through the feed and extract each calendar entry.
-	print_event_feed(calendar_feed)
+	for event in calendar_feed.entry:
+		if event.title.text == lab.name:
+			when = event.when[0]
+			# Note: Slicing of tz-data
+			start = datetime.strptime(when.start_time[:-6],'%Y-%m-%dT%H:%M:%S.000')
+			end = datetime.strptime(when.end_time[:-6],'%Y-%m-%dT%H:%M:%S.000')
+			return {'start':start,'end':end}
+	
+				
 
-def print_event_feed(event_feed):
-
-	for index, event in enumerate(event_feed.entry):
-		print "\t%d) %s\r\n\tContent: %s" % (index, event.title.text, event.content.text)
-		print "\t\tWho:"
-		for person in event.who:
-			print "\t\t\tName: %s\n\t\t\temail: %s" % (person.name, person.email)
-		print "\t\tAuthors:"
-		for author in event.author:
-			print "\t\t\t%s" % (author.name.text)
-		print "\t\tWhen:"
-		if event.recurrence is not None:
-			parsedCal = vobject.readOne(event.recurrence.text)
-			print parsedCal
-		#for e_index, e_time in enumerate(event.when):
-		#	print "\t\t\t%d) Start time: %s\n\t\t\tEnd time: %s" % (e_index, e_time.start_time, e_time.end_time)
