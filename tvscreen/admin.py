@@ -11,7 +11,7 @@ class PrinterInline(admin.TabularInline):
 
 class LabAdmin(admin.ModelAdmin):
 	fieldsets = [
-		(None,	{'fields': ['name']})
+		(None,	{'fields': ['name','welcome_msg']})
 	]
 	inlines = [AdminComputerInline, PrinterInline]
 

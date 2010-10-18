@@ -21,7 +21,7 @@ def lab(request, lab_id):
 	update_admins_martbo_style()
 	capacity_list = Capacity.objects.select_related().filter(lab=lab_id)
 	totals = get_totals(capacity_list)
-	url_totals = create_totals_pie_url(capacity_list, 300)
+	url_totals = create_totals_pie_url(capacity_list, 400)
 	url_os = create_os_bar_url(capacity_list)
 	others = create_other_urls(Lab.objects.exclude(pk=lab_id))
 	admins = get_names(lab_id)
@@ -62,6 +62,7 @@ def create_other_urls(other_labs):
 	return urls
 
 def create_os_bar_url(capacity_list):
+	# TODO: text color-parameter
 	# Reference: http://code.google.com/apis/chart/docs/gallery/bar_charts.html
 	# free = total-(down+in_use)
 	free = [c.total - c.down - c.in_use for c in capacity_list]
@@ -73,26 +74,29 @@ def create_os_bar_url(capacity_list):
 	# Type = p is 2d-chart (choose pc?)
 	o += "cht=bhs&"
 	# Axis style = axis_index, rgb, points
-	o += "chxs=0,000000,16|1,000000,16&"
+	o += "chxs=0,ffffff,16|1,ffffff,16&"
 	# Visible Axes = y is left, x is bottom
 	o += "chxt=y&"
 	# Size = widht x height
 	o += "chs=150x100&"
 	# Color = red, green
-	o += "chco=000000|4D89F9&"
+	o += "chco=ffffff|4D89F9&"
 	# Custom axis Labels = axis_index:|lbl1|lbl2
 	#axis_labels = "chxl=0:|Windows|UNIX|1:|0|" + str(sum(free))
 	o += "chxl=0:|Windows|UNIX&"
 	# Data scaling
 	o += "chds=0," + str(sum(free)) + "&"
 	# Markers
-	o += "chm=N,000000,0,-1,11"
+	o += "chm=N,ffffff,0,-1,16&"
+	# color fills (background)
+	o += "chf=bg,s,ffffff00"
 
 	return o
 
 def create_totals_pie_url(capacity_list, px):
 	# Reference: http://code.google.com/apis/chart/docs/gallery/pie_charts.html
 	# TODO: Add markers!
+	# TODO: text color-parameter
 	totals = get_totals(capacity_list)
 	if totals['total'] == 0:
 		print "Could not create a pie-url. No capacity data."
@@ -113,6 +117,8 @@ def create_totals_pie_url(capacity_list, px):
 	#o += "chxt=x&"
 	# Labels = lbl1, lbl2
 	#o += "chl=Free|In use"
+	# color fills (background)
+	o += "chf=bg,s,ffffff00"
 	
 	return o
 
@@ -172,7 +178,6 @@ def get_rrd_path(lab, the_os):
 
 def update_admins_martbo_style():
 	rwhodir = os.path.expanduser('~martbo/bin/infoskjerm/')
-
 
 	adm_comp = AdminComputer.objects.all()
 
