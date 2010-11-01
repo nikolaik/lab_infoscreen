@@ -193,7 +193,11 @@ def update_admins_martbo_style():
 		else:
 			try:
 				file = open(filename)
-				comp.admin_username = re.findall(r"user;1;(\w+);;:0",file.read())[0]
+				search = re.findall(r"user;1;(\w+);;:0",file.read())
+				if len(search) == 1:
+					comp.admin_username = search[0]
+				else:
+					comp.admin_username = ""
 				comp.save()
 			finally:
 				file.close()
@@ -208,6 +212,8 @@ def get_names(lab_id):
 	
 def get_firstname(username):
 	# ask the user database for iso-8859-1 encoded full name, then take the first name from it.
+	if username is '':
+		return None
 	try:
 		firstname = pwd.getpwnam(username)[4].decode('iso-8859-1').split()[0]
 	except KeyError: 

@@ -1,4 +1,5 @@
 TODO:
+- jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling).
 - Google calendar data should be cached, instead of being fetched per reload.
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik
