@@ -6,6 +6,9 @@ TODO:
 - http://code.djangoproject.com/wiki/SplitSettings
 - replace static image charts with http://code.google.com/apis/visualization/documentation/index.html
 
+TODO-ifpossible:
+- last rejected printerjobs w/ reason (empty quota or no access)
+
 UIO-specific setup:
 - added django official release dir. to $PYTHONPATH
 
@@ -21,7 +24,7 @@ Included:
 Classes:
 Lab
 	`- Printer
-		- Get from lpq or similar. 
+		- Get from ppq or lpq. 
 		
 	`- Capacity
 		- Get from rrds [DONE]

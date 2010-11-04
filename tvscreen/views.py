@@ -161,7 +161,7 @@ def update_capacities():
 				defaults={'last_updated': new_last_updated, 'in_use': new_in_use, 'down': new_down, 'total': new_total })
 
 			need_update = rrd_update <= cur.last_updated
-			if (not created) and need_update:
+			if (not created) or need_update:
 				cur.last_updated = new_last_updated
 				cur.in_use = new_in_use
 				cur.down = new_down
