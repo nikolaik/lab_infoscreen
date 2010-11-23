@@ -4,6 +4,7 @@
 	<head>
 		<title>{{ lab.name|capfirst }}</title>
 		<link rel="stylesheet"  type="text/css" href="/static/4sq_like.css" />
+		<meta http-equiv="refresh" content="15" />
 	</head>
 	<body>
 	<div id="container">
@@ -64,9 +65,9 @@
 		</div>
 		<div class="admins">
 			<h2>Need help?</h2>
-			Then just ask your lab assistants 
+			Then just ask your lab assistant(s) 
 			{% for admin in admins %}
-				<span class="admin_name">{{ admin }}</span>
+				<div class="admin_name">{{ admin }}</div>
 			{% endfor %}
 			<!-- TODO: Sort according to custom machine order. -->
 		</div>
@@ -76,7 +77,7 @@
 				<table>
 					<tr>
 						<td>
-							<img src="/static/printer.svg" />
+							<img src="/static/printer.png" />
 						</td>
 						<td>
 							<ul>
@@ -92,7 +93,7 @@
 			{% endif %}
 			</div>
 			<div class="hours">
-				<img src="/static/cairo-clock.svg" />
+				<img src="/static/cairo-clock.png" />
 				<span class="time">{{ hours.start|date:"H:i" }}</span> - <span class="time">{{ hours.end|date:"H:i" }}</span>
 			</div>
 		</div>

@@ -10,7 +10,7 @@ a {
 body {
 	background-color:#000000;
 	color:#ffffff;
-	font-family:'Helvetica';
+	font-family:serif;
 	font-size:1.5em;
 	height:100%;
 	padding:0;
@@ -61,7 +61,7 @@ div.printers {
 }
 div.admins {
 }
-span.admin_name {
+.admin_name {
 	font-size:2.3em;
 }
 div.hours {

@@ -1,5 +1,6 @@
 TODO:
-- jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling).
+- Split the free-dataset into a unix and a windows part.
+- jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling). Leave http-equiv='refresh' behind.
 - Google calendar data should be cached, instead of being fetched per reload.
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik

@@ -181,7 +181,9 @@ def get_rrd_path(lab, the_os):
 	return rrd_path
 
 def update_admins_martbo_style():
-	rwhodir = os.path.expanduser('~martbo/bin/infoskjerm/')
+	'''path = "~martbo/bin/infoskjerm/"'''
+	path = '/local/ifivar/rwho2/'
+	rwhodir = os.path.expanduser(path)
 
 	adm_comp = AdminComputer.objects.all()
 
@@ -199,8 +201,9 @@ def update_admins_martbo_style():
 				else:
 					comp.admin_username = ""
 				comp.save()
-			finally:
 				file.close()
+			except Exception:
+				print "could not open " + filename + "."
 
 def get_names(lab_id):
 	comps = AdminComputer.objects.filter(lab=lab_id)
