@@ -2,7 +2,7 @@
 from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer, OpeningHours, OS
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
-import sys, os, re, pwd
+import sys, os, re, pwd, string
 from datetime import datetime, timedelta, date, time
 from subprocess import Popen, PIPE
 import gdata.calendar.service
@@ -26,6 +26,7 @@ def lab(request, lab_id):
 	others = create_other_urls(lab_id)
 	admins = get_names(lab_id)
 	hours = get_todays_openinghours(lab_id)
+	queues = get_printerqueues(lab_id)
 	return HttpResponse(render_to_response('public/lab.html',
 		{
 		'lab' : lab,
@@ -37,6 +38,7 @@ def lab(request, lab_id):
 		'others' : others,
 		'admins' : admins,
 		'hours' : hours,
+		'queues' : queues,
 		}))
 
 def printer_detail(request, lab_id, printer_id):
@@ -168,8 +170,8 @@ def update_capacities():
 				cur.total = new_total
 				cur.save()
 
-def parse_lastupdate(string):
-	return re.findall(r"(\d+)",string)
+def parse_lastupdate(txt):
+	return re.findall(r"(\d+)",txt)
 
 def get_rrd_path(lab, the_os):
 	# Directory containing the rrd-files to parse
@@ -190,15 +192,17 @@ def update_admins_martbo_style():
 	for comp in adm_comp:
 		filename = os.path.join(rwhodir,"rwho2." + comp.name + ".ifi.uio.no")
 		if not os.path.exists(filename):
-			print "did not find " + filename + ". Aborting update..."
+			print "did not find " + filename + ". Fix the name of the admin computers!"
 			break
 		else:
 			try:
 				file = open(filename)
+				# Search for the user attached to the console session.
 				search = re.findall(r"user;1;(\w+);;:0",file.read())
 				if len(search) == 1:
 					comp.admin_username = search[0]
 				else:
+					# Put the empty string in the db when no one is logged in.
 					comp.admin_username = ""
 				comp.save()
 				file.close()
@@ -208,14 +212,18 @@ def update_admins_martbo_style():
 def get_names(lab_id):
 	comps = AdminComputer.objects.filter(lab=lab_id)
 
-	names = [get_firstname(comp.admin_username) for comp in comps]
-	if names[0] == None:
-		return
+	names = []
+	for comp in comps:
+		name = get_firstname(comp.admin_username)
+		if name is not None:
+			names.append(name)
+	
 	return names
 	
 def get_firstname(username):
 	# ask the user database for iso-8859-1 encoded full name, then take the first name from it.
-	if username is '':
+	if len(username) == 0:
+		# No user.
 		return None
 	try:
 		firstname = pwd.getpwnam(username)[4].decode('iso-8859-1').split()[0]
@@ -248,5 +256,49 @@ def get_todays_openinghours(lab_id):
 			end = datetime.strptime(when.end_time[:-6],'%Y-%m-%dT%H:%M:%S.000')
 			return {'start':start,'end':end}
 	
-				
+def get_printerqueues(lab_id):
+	printers = Printer.objects.filter(lab=lab_id)
+	ppq = '/local/bin/ppq'
+	lpq = '/local/bin/lpq'
+
+	queues = {}
+	for printer in printers:
+		queue = []
+
+		if printer.system == 'ppq':
+			cmd = [ppq, printer.name]
+			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+			stdout, stderr = p.communicate()
+
+			queue = parse_ppq_data(stdout)
+		elif printer.system == 'lpq': 
+			cmd = [lpq, '-P'+printer.name]
+			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+			stdout, stderr = p.communicate()
+
+			queue = parse_lpq_data(stdout)
+		else:
+			pass
+			
+		queues[printer.name] = queue
+		printer.queue_size = len(queue)
+		printer.save()
+	return queues
+
+def parse_lpq_data(data):
+	hr = '  Rank     Owner    Job                 Title                  Size     Time   '
+	pos = string.find(data,hr)
+	jobs = data[pos+len(hr):]
+
+	users = re.findall(r" (\w+) \d+ ", jobs)
+	return users
+
+def parse_ppq_data(data):
+	# remove titles and general status 
+	hr = '----------------------------------------------------------------------------\n'
+	pos = string.find(data,hr)
+	jobs = data[pos+len(hr):]
+
+	users = re.findall(r"\d+ (\w+)@",jobs)
+	return users
 

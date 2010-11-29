@@ -1,12 +1,15 @@
 TODO:
-- Split the free-dataset into a unix and a windows part.
-- jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling). Leave http-equiv='refresh' behind.
+- unhandled gdata returning HTTP-500.
 - Google calendar data should be cached, instead of being fetched per reload.
+- jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling). Leave http-equiv='refresh' behind.
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik
 - http://code.djangoproject.com/wiki/SplitSettings
 - replace static image charts with http://code.google.com/apis/visualization/documentation/index.html
 
+TODO-maybe :
+- Split the free-dataset into a unix and a windows part.
+ 
 TODO-ifpossible:
 - last rejected printerjobs w/ reason (empty quota or no access)
 
@@ -25,7 +28,7 @@ Included:
 Classes:
 Lab
 	`- Printer
-		- Get from ppq or lpq. 
+		- Get from ppq or lpq [DONE] 
 		
 	`- Capacity
 		- Get from rrds [DONE]
