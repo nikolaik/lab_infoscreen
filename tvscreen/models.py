@@ -47,6 +47,7 @@ class Printer(models.Model):
 
 	lab = models.ForeignKey(Lab)
 
+	queue = models.CharField(max_length=200)
 	queue_size = models.IntegerField()
 	system = models.CharField(max_length=200)
 	name = models.CharField(max_length=200)

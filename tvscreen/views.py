@@ -1,5 +1,5 @@
 # Create your views here.
-from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer, OpeningHours, OS
+from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer, OpeningHours, OS 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 import sys, os, re, pwd, string
@@ -26,7 +26,7 @@ def lab(request, lab_id):
 	others = create_other_urls(lab_id)
 	admins = get_names(lab_id)
 	hours = get_todays_openinghours(lab_id)
-	queues = get_printerqueues(lab_id)
+	get_printer_queues(lab_id)
 	return HttpResponse(render_to_response('public/lab.html',
 		{
 		'lab' : lab,
@@ -38,7 +38,6 @@ def lab(request, lab_id):
 		'others' : others,
 		'admins' : admins,
 		'hours' : hours,
-		'queues' : queues,
 		}))
 
 def printer_detail(request, lab_id, printer_id):
@@ -170,8 +169,8 @@ def update_capacities():
 				cur.total = new_total
 				cur.save()
 
-def parse_lastupdate(txt):
-	return re.findall(r"(\d+)",txt)
+def parse_lastupdate(text):
+	return re.findall(r"(\d+)",text)
 
 def get_rrd_path(lab, the_os):
 	# Directory containing the rrd-files to parse
@@ -183,7 +182,6 @@ def get_rrd_path(lab, the_os):
 	return rrd_path
 
 def update_admins_martbo_style():
-	'''path = "~martbo/bin/infoskjerm/"'''
 	path = '/local/ifivar/rwho2/'
 	rwhodir = os.path.expanduser(path)
 
@@ -192,7 +190,7 @@ def update_admins_martbo_style():
 	for comp in adm_comp:
 		filename = os.path.join(rwhodir,"rwho2." + comp.name + ".ifi.uio.no")
 		if not os.path.exists(filename):
-			print "did not find " + filename + ". Fix the name of the admin computers!"
+			print "did not find " + filename + ". Path or admin computer name is wrong!"
 			break
 		else:
 			try:
@@ -246,6 +244,7 @@ def get_todays_openinghours(lab_id):
 	query.start_min = today_str	# inclusive
   	query.start_max = tomorrow_str # exclusive
 	# Query the server for an Atom feed containing a list of your calendars.
+	return None
   	calendar_feed = client.CalendarQuery(query)
 	# Loop through the feed and extract each calendar entry.
 	for event in calendar_feed.entry:
@@ -256,12 +255,11 @@ def get_todays_openinghours(lab_id):
 			end = datetime.strptime(when.end_time[:-6],'%Y-%m-%dT%H:%M:%S.000')
 			return {'start':start,'end':end}
 	
-def get_printerqueues(lab_id):
+def get_printer_queues(lab_id):
 	printers = Printer.objects.filter(lab=lab_id)
 	ppq = '/local/bin/ppq'
 	lpq = '/local/bin/lpq'
 
-	queues = {}
 	for printer in printers:
 		queue = []
 
@@ -279,13 +277,13 @@ def get_printerqueues(lab_id):
 			queue = parse_lpq_data(stdout)
 		else:
 			pass
-			
-		queues[printer.name] = queue
+		
+		printer.queue = ', '.join(queue)
 		printer.queue_size = len(queue)
 		printer.save()
-	return queues
 
 def parse_lpq_data(data):
+	# skip after titles and general status 
 	hr = '  Rank     Owner    Job                 Title                  Size     Time   '
 	pos = string.find(data,hr)
 	jobs = data[pos+len(hr):]
@@ -294,7 +292,7 @@ def parse_lpq_data(data):
 	return users
 
 def parse_ppq_data(data):
-	# remove titles and general status 
+	# skip after titles and general status 
 	hr = '----------------------------------------------------------------------------\n'
 	pos = string.find(data,hr)
 	jobs = data[pos+len(hr):]
