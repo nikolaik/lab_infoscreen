@@ -244,7 +244,6 @@ def get_todays_openinghours(lab_id):
 	query.start_min = today_str	# inclusive
   	query.start_max = tomorrow_str # exclusive
 	# Query the server for an Atom feed containing a list of your calendars.
-	return None
   	calendar_feed = client.CalendarQuery(query)
 	# Loop through the feed and extract each calendar entry.
 	for event in calendar_feed.entry:
