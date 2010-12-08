@@ -6,7 +6,7 @@ class Lab(models.Model):
 		return self.name
 
 	name = models.CharField(max_length=200)
-	welcome_msg = models.CharField(max_length=400)
+	welcome_msg = models.CharField(max_length=400, blank=True)
 
 class OpeningHours(models.Model):
 	def __unicode__(self):

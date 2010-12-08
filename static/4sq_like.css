@@ -81,3 +81,8 @@ h3 {
 .bold {
 	font-weight:bold;
 }
+#spinner {
+  display: none;
+  position: relative;
+}
+

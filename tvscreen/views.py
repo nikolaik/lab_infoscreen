@@ -1,7 +1,8 @@
 # Create your views here.
-from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer, OpeningHours, OS 
+from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer, OpeningHours, OS
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
+from django.template.context import RequestContext
 import sys, os, re, pwd, string
 from datetime import datetime, timedelta, date, time
 from subprocess import Popen, PIPE
@@ -13,37 +14,46 @@ def index(request):
 	lab_list = Lab.objects.all().order_by('name')
 	return HttpResponse(render_to_response('public/index.html', {'lab_list' : lab_list}))
 
-def lab(request, lab_id):
-	lab = get_object_or_404(Lab, pk=lab_id)
+def lab(request, lab_name):
+	lab = get_object_or_404(Lab, name=lab_name)
 
-	printer_list = Printer.objects.filter(lab=lab_id)
-	update_capacities()
+	printer_list = Printer.objects.filter(lab=lab.id)
 	update_admins_martbo_style()
-	capacity_list = Capacity.objects.select_related().filter(lab=lab_id)
-	totals = get_totals(capacity_list)
-	url_totals = create_totals_pie_url(capacity_list, 400)
-	url_os = create_os_bar_url(capacity_list)
-	others = create_other_urls(lab_id)
-	admins = get_names(lab_id)
-	hours = get_todays_openinghours(lab_id)
-	get_printer_queues(lab_id)
-	return HttpResponse(render_to_response('public/lab.html',
-		{
+	admins = get_names(lab.id)
+	hours = get_todays_opening_hours(lab.id)
+	get_printer_queues(lab.id)
+
+	data = {
 		'lab' : lab,
 		'printer_list' : printer_list,
-		'capacity_list' : capacity_list,
-		'totals' : totals,
-		'url_totals' : url_totals,
-		'url_os' : url_os,
-		'others' : others,
 		'admins' : admins,
 		'hours' : hours,
-		}))
+		}
+	return HttpResponse( render_to_response('public/lab.html', data) )
 
 def printer_detail(request, lab_id, printer_id):
 	lab = get_object_or_404(Lab, pk=lab_id)
 	printer = get_object_or_404(Printer, pk=printer_id)
-	return HttpResponse(render_to_response('public/printer.html', {'printer' : printer}))
+	return HttpResponse( render_to_response('public/printer.html', {'printer' : printer}) )
+
+def lab_capacity(request, lab_name):
+	if request.is_ajax():
+		lab = get_object_or_404(Lab, name=lab_name)
+		update_capacities()
+		capacity_list = Capacity.objects.select_related().filter(lab=lab.id)
+		totals = get_totals(capacity_list)
+		url_totals = create_totals_pie_url(capacity_list, 400)
+		url_os = create_os_bar_url(capacity_list)
+		others = create_other_urls(lab.id)
+
+		data = {
+			'capacity_list' : capacity_list,
+			'totals' : totals,
+			'url_totals' : url_totals,
+			'url_os' : url_os,
+			'others' : others,
+		}
+		return render_to_response( 'public/capacity.html', data, context_instance = RequestContext(request) )
 
 def get_totals(capacity_list):
 	# TODO: This is stupid and should be done another way.
@@ -133,7 +143,7 @@ def update_capacities():
 	# Location of rrdtool
 	rrdtool = "/usr/bin/X11/rrdtool"
 	if not os.path.exists(rrdtool):
-		print "rrdtool is not installed. Run: 'sudo apt-get install rrdtool' to fix"
+		print "rrdtool is not installed. Run: 'sudo apt-get install rrdtool' to fix."
 		return
 
 	# rrdtool command
@@ -230,7 +240,8 @@ def get_firstname(username):
 		return None
 	return firstname
 
-def get_todays_openinghours(lab_id):
+def get_todays_opening_hours(lab_id):
+	#TODO: Save opening hours from gcal and update @ 07, 15, 19.
 	lab = Lab.objects.get(pk=lab_id)
 	today = datetime.today()
 	today_str = today.strftime("%Y-%m-%d")
@@ -252,6 +263,7 @@ def get_todays_openinghours(lab_id):
 			# Note: Slicing of tz-data
 			start = datetime.strptime(when.start_time[:-6],'%Y-%m-%dT%H:%M:%S.000')
 			end = datetime.strptime(when.end_time[:-6],'%Y-%m-%dT%H:%M:%S.000')
+			
 			return {'start':start,'end':end}
 	
 def get_printer_queues(lab_id):

@@ -1,0 +1,47 @@
+				{% if totals.total %}
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<div class="stats_title">Total</div><div class="stats_content">{{ totals.total }}</div>
+							</td>
+							<td>
+								<div class="stats_title">Free</div><div class="stats_content">{{ totals.free }}</div>
+							</td>
+							<td>
+								<div class="stats_title">In Use</div><div class="stats_content">{{ totals.in_use}}</div>
+							</td>
+							<!-- percent -->
+
+						</tr>
+						<tr>
+							<td colspan="2">
+								<img src="{{ url_totals }}" />
+							</td>
+							<td>
+								<img src="{{ url_os }}" />
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				{% else %}
+				No data.
+				{% endif %}
+			<div class="capacity_other">
+				<table>
+					<tbody>
+						<tr>
+						{% for other in others %}
+								{% if other.url %}
+									<td width="200">
+										<h3>{{ other.lab.name }}</h3>
+										<img src="{{ other.url }}" />
+									</td>
+								{% else %}
+									No data.
+								{% endif %}
+						{% endfor %}
+						</tr>
+					</tbody>
+				</table>
+			</div>
