@@ -1,5 +1,7 @@
 *~
 *.swp
 *.pyc
+.pydevproject
+.project
 settings.py
 lab_infoscreen.sqlite3
