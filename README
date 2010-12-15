@@ -1,11 +1,19 @@
 TODO:
+- bug with use of '{% url .. %}' in the lab.html template.
 - unhandled gdata returning HTTP-500.
 - Google calendar data should be cached, instead of being fetched per reload.
 - jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling). Leave http-equiv='refresh' behind.
+	- capacity [DONE]
+	- admin
+	- printer
+	- openinghours!
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik
 - http://code.djangoproject.com/wiki/SplitSettings
-- replace static image charts with http://code.google.com/apis/visualization/documentation/index.html
+- replace static image charts with
+	- http://code.google.com/apis/visualization/documentation/index.html
+	or
+	- http://highcharts.com
 
 TODO-maybe :
 - A public interactive part of the infoscreen-app.

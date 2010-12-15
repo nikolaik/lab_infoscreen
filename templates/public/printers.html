@@ -1,0 +1,26 @@
+			{% if printer_list %}
+				<table>
+					<tr>
+						<td>
+							<img src="/static/printer.png" />
+						</td>
+						<td>
+							<ul>
+								{% for printer in printer_list %}
+									<li>
+										{{ printer.name }}: <span class="bold">{{ printer.queue_size|default:"No queue." }}</span>
+										{% if printer.queue %}
+										<ul>
+											<li>{{ printer.queue }}</li>
+										</ul>
+										{% endif %}
+									</li>
+										
+								{% endfor %}
+							</ul>
+						</td>
+					</tr>
+				</table>
+			{% else %}
+				<p>No printers defined.</p>
+			{% endif %}

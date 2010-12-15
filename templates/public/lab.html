@@ -4,110 +4,79 @@
 	<head>
 		<title>{{ lab.name|capfirst }}</title>
 		<link rel="stylesheet"  type="text/css" href="/static/4sq_like.css" />
-		<meta http-equiv="refresh" content="15" />
+		<!--<meta http-equiv="refresh" content="15" />-->
+		<script type="text/javascript" src="/static/jquery-1.4.4.js"></script>
+		<script type="text/javascript" src="/static/jquery.jclock.js_4.js"></script>
+		<script type="text/javascript" src="/static/jquery.timers-1.2.js"></script>
+
+		<script type="text/javascript">
+			/* Add a clock to the footer. */
+    		$(function($) {
+				var options = {
+					format: '%A, %Y-%m-%d, %H:%M:%S'
+				};
+				$('.current_time').jclock(options);
+		    });
+			/* Function that updates the capacities */
+			var update_capacities = function() {
+					$( '#capacity' ).load(
+						'/lab/{{ lab.name }}/capacity/');
+						/*TODO: The url template keyword does not find the view, maybe the urlpattern is wrong.
+						 * http://docs.djangoproject.com/en/dev/ref/templates/builtins/?from=olddocs*/
+						/*'url lab_capacity');*/
+				};
+			var update_admins = function() {
+					$( '#admins' ).load(
+						'/lab/{{ lab.name }}/admins/');
+				};
+			var update_printers = function() {
+					$( '#printers' ).load(
+						'/lab/{{ lab.name }}/printers/');
+				};
+			var update_hours = function() {
+					$( '#hours' ).load(
+						'/lab/{{ lab.name }}/hours/');
+				};
+			/* Initial update */
+			$( document ).ready( update_capacities );
+			$( document ).ready( update_admins );
+			$( document ).ready( update_printers );
+			$( document ).ready( update_hours );
+
+			/* Ajax spinner */
+			$( document ).ajaxStart( function() {
+					$( '#spinner' ).show();
+					}).ajaxStop( function() {
+						$( '#spinner' ).hide();
+					});
+			/* Start timers updating a screen resource. */
+			$( document).everyTime('180s', update_capacities );
+			$( document).everyTime('60s', update_admins );
+			$( document).everyTime('30s', update_printers );
+			$( document).everyTime('1h', update_hours );
+		  </script>
 	</head>
+
 	<body>
 	<div id="container">
 		<div id="header"><h1>{{ lab.name|capfirst }} lab</h1>
 			{{ lab.welcome_msg }} 
 		</div>
 		<div id="left">
-			<div class="capacity">
-				<h2>Capacity</h2>
-				{% if totals.total %}
-				<table>
-					<tbody>
-						<tr>
-							<td>
-								<div class="stats_title">Total</div><div class="stats_content">{{ totals.total }}</div>
-							</td>
-							<td>
-								<div class="stats_title">Free</div><div class="stats_content">{{ totals.free }}</div>
-							</td>
-							<td>
-								<div class="stats_title">In Use</div><div class="stats_content">{{ totals.in_use}}</div>
-							</td>
-							<!-- percent -->
-
-						</tr>
-						<tr>
-							<td colspan="2">
-								<img src="{{ url_totals }}" />
-							</td>
-							<td>
-								<img src="{{ url_os }}" />
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				{% else %}
-				No data.
-				{% endif %}
-			</div>
-			<div class="capacity_other">
-				<table>
-					<tbody>
-						<tr>
-						{% for other in others %}
-								{% if other.url %}
-									<td width="200">
-										<h3>{{ other.lab.name }}</h3>
-										<img src="{{ other.url }}" />
-									</td>
-								{% else %}
-									No data.
-								{% endif %}
-						{% endfor %}
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			<h2>Capacity</h2>
+			<span id="spinner"><img src="/static/spinner.gif"/> Loading capacities...</span>
+			<div id="capacity">	</div>
 		</div>
-		<div class="admins">
-			<h2>Need help?</h2>
-			Then just ask your lab assistant(s) 
-			{% for admin in admins %}
-				<div class="admin_name">{{ admin }}</div>
-			{% endfor %}
-			<!-- TODO: Sort according to custom machine order. -->
-		</div>
-			{% if printer_list %}
+		<h2>Need help?</h2>
+		Then just ask your lab assistant(s) 
+		<div id="admins"></div>
 		<div id="right">
-			<div class="printers">
-				<table>
-					<tr>
-						<td>
-							<img src="/static/printer.png" />
-						</td>
-						<td>
-							<ul>
-								{% for printer in printer_list %}
-									<li>
-										{{ printer.name }}: <span class="bold">{{ printer.queue_size|default:"No queue." }}</span>
-										{% if printer.queue %}
-										<ul>
-											<li>{{ printer.queue }}</li>
-										</ul>
-										{% endif %}
-									</li>
-										
-								{% endfor %}
-							</ul>
-						</td>
-					</tr>
-				</table>
-			{% else %}
-				<p>No printers defined.</p>
-			{% endif %}
-			</div>
-			<div class="hours">
-				<img src="/static/cairo-clock.png" />
-				<span class="time">{{ hours.start|date:"H:i" }}</span> - <span class="time">{{ hours.end|date:"H:i" }}</span>
-			</div>
+			<div id="printers"></div>
+			<div id="hours"></div>
 		</div>
 		<div id="footer">
-		Lab assistants @ Mat-Nat
-			<span class="current_time">{% now "H:i - l jS \o\f F" %}</span>
+			Lab assistants @ Mat-Nat
+			<span class="current_time"></span>
 		</div>
 	</div>
 	</body>
