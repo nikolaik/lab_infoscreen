@@ -3,8 +3,8 @@ from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-import sys, os, re, pwd, string
-from datetime import datetime, timedelta, date, time
+import os, re, pwd, string
+from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
 import gdata.calendar.service
 from urllib import urlencode, quote
@@ -193,7 +193,7 @@ def update_capacities():
 			cmd = [rrdtool, rrd_cmd, rrd_path]
 			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 			stdout, stderr = p.communicate()
-
+			
 			tmp_new_last_updated, new_in_use, new_down, new_total = parse_lastupdate(stdout)
 			new_last_updated = datetime.fromtimestamp(int(tmp_new_last_updated))
 			cur, created = Capacity.objects.get_or_create(lab=the_lab,os=the_os,
@@ -281,9 +281,9 @@ def get_todays_opening_hours(lab_id):
 	calendar_id = 'omhp3g69p6cgc0je9mfr31bcv4@group.calendar.google.com'
 	query = gdata.calendar.service.CalendarEventQuery(calendar_id, 'public', 'full')
 	query.start_min = today_str	# inclusive
-  	query.start_max = tomorrow_str # exclusive
+	query.start_max = tomorrow_str # exclusive
 	# Query the server for an Atom feed containing a list of your calendars.
-  	calendar_feed = client.CalendarQuery(query)
+	calendar_feed = client.CalendarQuery(query)
 	# Loop through the feed and extract each calendar entry.
 	for event in calendar_feed.entry:
 		if event.title.text == lab.name:
