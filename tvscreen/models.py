@@ -25,7 +25,7 @@ class OS(models.Model):
 
 class Capacity(models.Model):
 	def __unicode__(self):
-		return str(self.lab) + ": " + str(self.os) + ": " +str(free()) + "/" + str(self.total)
+		return str(self.lab) + ": " + str(self.os) + ": " +str(self.free()) + "/" + str(self.total)
 
 	def free(self):
 		return self.total - self.in_use - self.down

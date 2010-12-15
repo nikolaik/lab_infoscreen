@@ -8,6 +8,7 @@ TODO:
 - replace static image charts with http://code.google.com/apis/visualization/documentation/index.html
 
 TODO-maybe :
+- A public interactive part of the infoscreen-app.
 - Split the free-dataset into a unix and a windows part.
  
 TODO-ifpossible:
