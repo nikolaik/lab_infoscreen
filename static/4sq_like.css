@@ -57,14 +57,14 @@ div.stats_title {
 div.stats_content {
 	font-size:2.3em;
 }
-div.printers {
+div#printers {
 }
-div.admins {
+div#admins {
 }
 .admin_name {
 	font-size:2.3em;
 }
-div.hours {
+div#hours {
 	font-size:2.3em;
 }
 span.current_time {
@@ -73,6 +73,9 @@ span.current_time {
 h2 {
 	margin-bottom:0;
 	margin-top:0;
+}		
+div#left h2 {
+	display:inline;
 }
 h3 {
 	margin-bottom:0;

@@ -17,17 +17,9 @@ def index(request):
 def lab(request, lab_name):
 	lab = get_object_or_404(Lab, name=lab_name)
 
-	printer_list = Printer.objects.filter(lab=lab.id)
-	update_admins_martbo_style()
-	admins = get_names(lab.id)
-	hours = get_todays_opening_hours(lab.id)
-	get_printer_queues(lab.id)
 
 	data = {
 		'lab' : lab,
-		'printer_list' : printer_list,
-		'admins' : admins,
-		'hours' : hours,
 		}
 	return HttpResponse( render_to_response('public/lab.html', data) )
 
@@ -39,6 +31,7 @@ def printer_detail(request, lab_id, printer_id):
 def lab_capacity(request, lab_name):
 	if request.is_ajax():
 		lab = get_object_or_404(Lab, name=lab_name)
+
 		update_capacities()
 		capacity_list = Capacity.objects.select_related().filter(lab=lab.id)
 		totals = get_totals(capacity_list)
@@ -54,6 +47,41 @@ def lab_capacity(request, lab_name):
 			'others' : others,
 		}
 		return render_to_response( 'public/capacity.html', data, context_instance = RequestContext(request) )
+
+def lab_admins(request, lab_name):
+	if request.is_ajax():
+		lab = get_object_or_404(Lab, name=lab_name)
+
+		update_admins_martbo_style()
+		admins = get_names(lab.id)
+
+		data = {
+			'admins' : admins,
+		}
+		return render_to_response( 'public/admins.html', data, context_instance = RequestContext(request) )
+
+def lab_printers(request, lab_name):
+	if request.is_ajax():
+		lab = get_object_or_404(Lab, name=lab_name)
+
+		printer_list = Printer.objects.filter(lab=lab.id)
+		get_printer_queues(lab.id)
+		data = {
+			'printer_list' : printer_list,
+		}
+
+		return render_to_response( 'public/printers.html', data, context_instance = RequestContext(request) )
+def lab_hours(request, lab_name):
+
+	if request.is_ajax():
+		lab = get_object_or_404(Lab, name=lab_name)
+
+		hours = get_todays_opening_hours(lab.id)
+
+		data = {
+			'hours' : hours,
+		}
+		return render_to_response( 'public/hours.html', data, context_instance = RequestContext(request) )
 
 def get_totals(capacity_list):
 	# TODO: This is stupid and should be done another way.
