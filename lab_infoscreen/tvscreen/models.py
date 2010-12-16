@@ -56,9 +56,6 @@ class AdminComputer(models.Model):
 	# ...
 	def __unicode__(self):
 		return self.name
-	
-	def is_taken(self):
-		return taken == 1
 
 	lab = models.ForeignKey(Lab)
 
