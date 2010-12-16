@@ -16,6 +16,7 @@ urlpatterns = patterns('',
 	# Note: See: http://docs.djangoproject.com/en/dev/howto/static-files/
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': '/hom/nikolark/tv/lab_infoscreen/lab_infoscreen/static'}),
+>>>>>>> Stashed changes
 	#  tvscreen-specific
     (r'^lab/', include('lab_infoscreen.tvscreen.urls')),
     (r'^admin/', include(admin.site.urls)),
