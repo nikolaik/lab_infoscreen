@@ -17,8 +17,12 @@ def index(request):
 
 def lab(request, lab_name):
 	lab = get_object_or_404(Lab, name=lab_name)
+	mobile_url = create_mobile_url()
 
-	data = { 'lab':lab }
+	data = {
+		'lab':lab,
+		'mobile_url':mobile_url,
+	}
 	return HttpResponse( render_to_response('public/lab.html', data) )
 
 def printer_detail(request, lab_id, printer_id):
@@ -111,6 +115,18 @@ def create_os_bar_url(capacity_list):
 	chart.set_axis_style(0, "ffffff", 16, -1)
 	for f in [free]:
 		chart.add_data(f)
+
+	return chart.get_url()
+
+def create_mobile_url():
+	size = 300 #px
+	url = "http://luke.ifi.uio.no:8000"
+	# Create a size x size QR code chart
+	chart = gc.QRChart(size, size)
+	# Add the text
+	chart.add_data(url)
+	# "Level H" error correction with a 0 pixel margin
+	chart.set_ec('H', 0)
 
 	return chart.get_url()
 
