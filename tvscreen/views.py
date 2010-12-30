@@ -17,7 +17,6 @@ def index(request):
 def lab(request, lab_name):
 	lab = get_object_or_404(Lab, name=lab_name)
 
-
 	data = {
 		'lab' : lab,
 		}
