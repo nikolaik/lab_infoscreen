@@ -1,12 +1,7 @@
 TODO:
 - bug with use of '{% url .. %}' in the lab.html template.
-- unhandled gdata returning HTTP-500.
-- Google calendar data should be cached, instead of being fetched per reload.
-- jquery refresh of screen resources. Only refresh on reseonable events or intervals (event vs polling). Leave http-equiv='refresh' behind.
-	- capacity [DONE]
-	- admin
-	- printer
-	- openinghours!
+- Handle gdata returning HTTP-500 in some way.
+- Google calendar data should be cached, instead of being fetched per request.
 - http://www.djangobook.com/en/beta/chapter04/ - 'Template inheritance'
 - designinspiration: http://foursquare.com/stats/nikolaik
 - http://code.djangoproject.com/wiki/SplitSettings
@@ -14,8 +9,10 @@ TODO:
 	- http://code.google.com/apis/visualization/documentation/index.html
 	or
 	- http://highcharts.com
+	- QR-kode to the url of the mobile version of the site.
 
 TODO-maybe :
+- A public interactive part of the infoscreen-app.
 - Split the free-dataset into a unix and a windows part.
  
 TODO-ifpossible:
@@ -29,6 +26,8 @@ There a few dependencies allready:
 	- src: http://www.djangoproject.com/download/
 - gdata (ubuntu: python-gdata)
 	- src: http://code.google.com/p/gdata-python-client/
+- pygooglechart (ubuntu: python-pygooglechart)
+	- src: http://pygooglechart.slowchop.com/
 
 Included:
 - Some Ubuntu/GNOME icons.

@@ -3,11 +3,12 @@ from lab_infoscreen.tvscreen.models import Lab, Printer, Capacity, AdminComputer
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-import sys, os, re, pwd, string
-from datetime import datetime, timedelta, date, time
+import os, re, pwd, string
+from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
 import gdata.calendar.service
-from urllib import urlencode, quote
+from pygooglechart import PieChart2D
+import pygooglechart as gc
 
 
 def index(request):
@@ -17,9 +18,7 @@ def index(request):
 def lab(request, lab_name):
 	lab = get_object_or_404(Lab, name=lab_name)
 
-	data = {
-		'lab' : lab,
-		}
+	data = { 'lab':lab }
 	return HttpResponse( render_to_response('public/lab.html', data) )
 
 def printer_detail(request, lab_id, printer_id):
@@ -37,7 +36,6 @@ def lab_capacity(request, lab_name):
 		url_totals = create_totals_pie_url(capacity_list, 400)
 		url_os = create_os_bar_url(capacity_list)
 		others = create_other_urls(lab.id)
-
 		data = {
 			'capacity_list' : capacity_list,
 			'totals' : totals,
@@ -45,18 +43,17 @@ def lab_capacity(request, lab_name):
 			'url_os' : url_os,
 			'others' : others,
 		}
+		
 		return render_to_response( 'public/capacity.html', data, context_instance = RequestContext(request) )
-
+	
 def lab_admins(request, lab_name):
 	if request.is_ajax():
 		lab = get_object_or_404(Lab, name=lab_name)
 
 		update_admins_martbo_style()
 		admins = get_names(lab.id)
-
-		data = {
-			'admins' : admins,
-		}
+		data = { 'admins':admins }
+		
 		return render_to_response( 'public/admins.html', data, context_instance = RequestContext(request) )
 
 def lab_printers(request, lab_name):
@@ -65,21 +62,18 @@ def lab_printers(request, lab_name):
 
 		printer_list = Printer.objects.filter(lab=lab.id)
 		get_printer_queues(lab.id)
-		data = {
-			'printer_list' : printer_list,
-		}
+		data = { 'printer_list':printer_list }
 
 		return render_to_response( 'public/printers.html', data, context_instance = RequestContext(request) )
+	
 def lab_hours(request, lab_name):
 
 	if request.is_ajax():
 		lab = get_object_or_404(Lab, name=lab_name)
-
+		
 		hours = get_todays_opening_hours(lab.id)
-
-		data = {
-			'hours' : hours,
-		}
+		data = { 'hours':hours }
+		
 		return render_to_response( 'public/hours.html', data, context_instance = RequestContext(request) )
 
 def get_totals(capacity_list):
@@ -103,70 +97,38 @@ def create_other_urls(lab_id):
 	return urls
 
 def create_os_bar_url(capacity_list):
-	# TODO: text color-parameter
-	# TODO: urllib.urlencode
-	# Reference: http://code.google.com/apis/chart/docs/gallery/bar_charts.html
-	# free = total-(down+in_use)
-	free = [c.total - c.down - c.in_use for c in capacity_list]
-	valuelist = ",".join([str(f) for f in free])
+	free = [c.free() for c in capacity_list]
+	os_capacities = []
+	for c in capacity_list:
+		os_capacities.append(str(c.os).capitalize())
+	
+	chart = gc.GroupedHorizontalBarChart(150, 75, x_range=(0, sum(free)) )
+	chart.fill_solid(PieChart2D.BACKGROUND, "000000")
+	chart.set_colours_within_series(["ffffff","4D89F9"])
+	chart.add_marker(0, 0, "t"+str(free[0]), "ffffff", 16)
+	chart.add_marker(0, 1, "t"+str(free[1]), "ffffff", 16)
+	chart.set_axis_labels(gc.Axis.LEFT, os_capacities)
+	chart.set_axis_style(0, "ffffff", 16, -1)
+	for f in [free]:
+		chart.add_data(f)
 
-	o = "http://chart.apis.google.com/chart?"
-	# Data
-	o += "chd=t:"+ str(valuelist) + "&"
-	# Type = p is 2d-chart (choose pc?)
-	o += "cht=bhs&"
-	# Axis style = axis_index, rgb, points
-	o += "chxs=0,ffffff,16|1,ffffff,16&"
-	# Visible Axes = y is left, x is bottom
-	o += "chxt=y&"
-	# Size = widht x height
-	o += "chs=150x100&"
-	# Color = red, green
-	o += "chco=ffffff|4D89F9&"
-	# Custom axis Labels = axis_index:|lbl1|lbl2
-	#axis_labels = "chxl=0:|Windows|UNIX|1:|0|" + str(sum(free))
-	o += "chxl=0:|Windows|UNIX&"
-	# Data scaling
-	o += "chds=0," + str(sum(free)) + "&"
-	# Markers
-	o += "chm=N,ffffff,0,-1,16&"
-	# color fills (background)
-	o += "chf=bg,s,ffffff00"
-
-	return o
+	return chart.get_url()
 
 def create_totals_pie_url(capacity_list, px):
 	# Reference: http://code.google.com/apis/chart/docs/gallery/pie_charts.html
-	# TODO: Add markers!
-	# TODO: text color-parameter
-	# TODO: urllib.urlencode
 	totals = get_totals(capacity_list)
-	if totals['total'] == 0:
-		print "Could not create a pie-url. No capacity data."
-		return "" 
-
-	o = "http://chart.apis.google.com/chart?"
-	# Axis style = 0, rgb, points
-	o += "chxs=0,000000,30&"
-	# Size = widht x height
-	o += "chs="+ str(px) + "x" + str(px) + "&"
-	# Type = p is 2d-chart (choose pc?)
-	o += "cht=p&"
-	# Color = green|red
-	o += "chco=008000|D43838&"
-	# Data
-	o += "chd=t:"+ str(totals['free']) +"," + str(totals['in_use']) + "&"
-	# Visible Axes = x is bottom
-	#o += "chxt=x&"
-	# Labels = lbl1, lbl2
-	#o += "chl=Free|In use"
-	# color fills (background)
-	o += "chf=bg,s,ffffff00"
+	if totals['total'] <= 0:
+		return ""
 	
-	return o
+	chart = PieChart2D(px, px)
+	chart.set_colours(["008000","D43838"])
+	chart.fill_solid(PieChart2D.BACKGROUND, "000000")
+	chart.fill_solid(PieChart2D.CHART, "000000")
+	chart.add_data([totals['free'],totals['in_use']])
+	
+	return chart.get_url()
 
 def update_capacities():
-	### CONFIG ###
 	# Location of rrdtool
 	rrdtool = "/usr/bin/X11/rrdtool"
 	if not os.path.exists(rrdtool):
@@ -175,15 +137,12 @@ def update_capacities():
 
 	# rrdtool command
 	rrd_cmd = "lastupdate"
-	rrd_update = datetime.now() - timedelta(minutes=15)
+	# 15 minutes ago
+	rrd_update_interval = datetime.now() - timedelta(minutes=15)
 
 	labs = Lab.objects.all()
 	oses = OS.objects.all()
-	'''
-	Is update older than now-rrd-update interval min?
-	If not then update, else return true.
-	Update all the labs.
-	'''
+
 	for the_lab in labs:
 		for the_os in oses:
 			rrd_path = get_rrd_path(the_lab.name, the_os.name)
@@ -192,14 +151,17 @@ def update_capacities():
 			cmd = [rrdtool, rrd_cmd, rrd_path]
 			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 			stdout, stderr = p.communicate()
-
+			
 			tmp_new_last_updated, new_in_use, new_down, new_total = parse_lastupdate(stdout)
 			new_last_updated = datetime.fromtimestamp(int(tmp_new_last_updated))
 			cur, created = Capacity.objects.get_or_create(lab=the_lab,os=the_os,
 				defaults={'last_updated': new_last_updated, 'in_use': new_in_use, 'down': new_down, 'total': new_total })
-
-			need_update = rrd_update <= cur.last_updated
+			
+			# Is the cached capacity data more than 15 min. old?
+			need_update = cur.last_updated <= rrd_update_interval
+			# Also check if it has just been created.
 			if (not created) or need_update:
+				# Update all the labs.
 				cur.last_updated = new_last_updated
 				cur.in_use = new_in_use
 				cur.down = new_down
@@ -280,9 +242,9 @@ def get_todays_opening_hours(lab_id):
 	calendar_id = 'omhp3g69p6cgc0je9mfr31bcv4@group.calendar.google.com'
 	query = gdata.calendar.service.CalendarEventQuery(calendar_id, 'public', 'full')
 	query.start_min = today_str	# inclusive
-  	query.start_max = tomorrow_str # exclusive
+	query.start_max = tomorrow_str # exclusive
 	# Query the server for an Atom feed containing a list of your calendars.
-  	calendar_feed = client.CalendarQuery(query)
+	calendar_feed = client.CalendarQuery(query)
 	# Loop through the feed and extract each calendar entry.
 	for event in calendar_feed.entry:
 		if event.title.text == lab.name:
@@ -296,23 +258,29 @@ def get_todays_opening_hours(lab_id):
 def get_printer_queues(lab_id):
 	printers = Printer.objects.filter(lab=lab_id)
 	ppq = '/local/bin/ppq'
-	lpq = '/local/bin/lpq'
-
+	lpq = '/local/bin/lpq' # TODO: Move this to a general settings page in the admin panel.
+	
 	for printer in printers:
 		queue = []
 
 		if printer.system == 'ppq':
-			cmd = [ppq, printer.name]
-			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-			stdout, stderr = p.communicate()
+			if not os.path.exists(ppq):
+				print "ppq (PRISS) is not present, are you @UiO?"
+			else:
+				cmd = [ppq, printer.name]
+				p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+				stdout, stderr = p.communicate()
+				
+				queue = parse_ppq_data(stdout)
+		elif printer.system == 'lpq':
+			if not os.path.exists(lpq):
+				print "lpq (CUPS) not found at '"+ lpq + "'. Try 'sudo apt-get install cups' or change the path."
+			else:
+				cmd = [lpq, '-P'+printer.name]
+				p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+				stdout, stderr = p.communicate()
 
-			queue = parse_ppq_data(stdout)
-		elif printer.system == 'lpq': 
-			cmd = [lpq, '-P'+printer.name]
-			p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-			stdout, stderr = p.communicate()
-
-			queue = parse_lpq_data(stdout)
+				queue = parse_lpq_data(stdout)
 		else:
 			pass
 		
